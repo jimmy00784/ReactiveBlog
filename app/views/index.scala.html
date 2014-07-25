@@ -1,7 +1,23 @@
-@(message: String)
+@(authors: List[Author])
 
 @main("Welcome to Play") {
 
-    <textarea rows="50" cols="100">@message</textarea>
+    Got @authors.size authors
 
+	<div>
+	@for(author <- authors){
+		id: @author.id <br/>
+		name: @author.name<br/>
+		email: @author.email<br/>
+		bio: @author.bio<br/><br/>
+	}
+	</div>
+
+	Add new:<br/>
+	<form action = '@routes.Application.index' method = 'POST'>
+		Name: <input name="name"/>
+		Email:<input name="email"/>
+		Bio:  <textarea name="bio"></textarea>
+		<input type="submit" value="submit"/>
+</form>
 }

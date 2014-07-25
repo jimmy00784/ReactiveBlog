@@ -2,7 +2,8 @@ package models
 
 import play.api.data._
 import play.api.data.Forms._
-
+import play.api.data.format.Formats._
+import play.api.data.validation.Constraints._
 import reactivemongo.bson.{BSONDateTime, BSONObjectID, BSONDocumentWriter, BSONDocumentReader, BSONDocument}
 import models.BSONProducers._
 /**
@@ -53,5 +54,38 @@ object Post {
 	)
   }
 
-  val form = Form()
+  val form = Form(
+		mapping(
+			fldId -> optional(of[String] verifying pattern(
+				"""[a-fA-F0-9]{24}""".r,
+        "constraint.objectId",
+        "error.objectId")),
+			fldDate -> date,
+			fldTitle -> nonEmptyText,
+			fldContent -> nonEmptyText,
+			fldBlogId -> nonEmptyText.verifying(pattern(
+				"""[a-fA-F0-9]{24}""".r,
+				"constraint.blogId",
+				"error.blogId")),
+			fldAuthorId -> nonEmptyText.verifying(pattern(
+				"""[a-fA-F0-9]{24}""".r,
+				"constraint.authorId",
+				"error.authorId"))
+			)
+			{ (id,date,title,content,blogId,authorId) => Post(
+				id.map(BSONObjectID(_)),
+				date,
+				title,
+				content,
+				BSONObjectID(blogId),
+				BSONObjectID(authorId),
+				List(),
+				List())
+			}
+			{
+				post => Some(
+					(post.id.map(_.stringify),post.date,post.title,post.content,post.blogid.stringify,post.authorid.stringify)
+				)
+			}
+			)
 }

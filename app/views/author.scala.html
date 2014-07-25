@@ -1,0 +1,10 @@
+@(lstAuthors: List[Author])
+  You have @lstAuthors.size authors
+
+  @helper.form(action = routes.AuthorController.submit()){
+    Name: <input name="name"/><br/>
+	Email: <input name="email"/><br/>
+	Bio:<br/>
+	<textarea rows="10" cols="20" name="bio"></textarea>
+    <button>Submit</button>
+  }

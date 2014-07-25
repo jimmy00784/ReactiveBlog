@@ -1,5 +1,9 @@
 package models
 
+import play.api.data._
+import play.api.data.Forms._
+import play.api.data.format.Formats._
+import play.api.data.validation.Constraints._
 import reactivemongo.bson.{BSONDocument, BSONDocumentWriter, BSONDocumentReader, BSONObjectID}
 
 /**
@@ -37,4 +41,24 @@ object Blog {
       doc.getAs[List[String]](fldTags).getOrElse(List())
     )
   }
+
+	val form = Form(
+		mapping(
+			fldId -> optional(of[String] verifying pattern(
+				"""[a-fA-F0-9]{24}""".r,
+				"constrant.objectid",
+				"error.objectid")),
+			fldTitle -> nonEmptyText,
+			fldCaption -> text)
+			{(id,title,caption) => Blog(
+				id.map(BSONObjectID(_)),
+				title,
+				caption,
+				List(),
+				List()
+			)}
+			{ blog => Some(
+				(blog.id.map(_.stringify),blog.title,blog.caption)
+			)}
+		)
 }
