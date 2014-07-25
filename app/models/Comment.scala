@@ -1,11 +1,15 @@
 package models
 
 import reactivemongo.bson._
+import play.api.data._
+import play.api.data.Forms._
+import play.api.data.format.Formats._
+import play.api.data.validation.Constraints._
 import models.BSONProducers._
 /**
  * Created by karim on 7/23/14.
  */
-case class Comment (date:java.util.Date, user:String, email:String, comment:String, response:Option[(java.util.Date,String)])
+case class Comment (date:java.util.Date, user:String, email:String, comment:String, response:Option[(Response)])
 
 object Comment {
   val fldDate = "date"
@@ -14,21 +18,7 @@ object Comment {
   val fldComment = "comment"
   val fldResponse = "response"
   
-  implicit object ResponseWriter extends BSONDocumentWriter[(java.util.Date,String)]{
-	def write(resp:(java.util.Date,String)):BSONDocument = BSONDocument(
-	  fldDate -> resp._1,
-	  fldComment -> resp._2
-	)
-  }
-  
-  implicit object ResponseReader extends BSONDocumentReader[(java.util.Date,String)]{
-	def read(doc:BSONDocument):(java.util.Date,String) = {
-	  val d = doc.getAs[java.util.Date](fldDate).get
-	  val s = doc.getAs[String](fldComment).getOrElse("")
-	  d -> s
-	}
-  }
-  
+ 
   implicit object CommentWriter extends BSONDocumentWriter[Comment]{
 	def write(comment: Comment):BSONDocument = BSONDocument(
 	  fldDate -> comment.date,
@@ -45,7 +35,17 @@ object Comment {
 	  doc.getAs[String](fldUser).getOrElse(""),
 	  doc.getAs[String](fldEmail).getOrElse(""),
 	  doc.getAs[String](fldComment).getOrElse(""),
-	  doc.getAs[(java.util.Date,String)](fldResponse)
+	  doc.getAs[Response](fldResponse)
 	)
   }
+
+  val form = Form(
+    mapping(
+      fldDate -> date,
+      fldUser -> nonEmptyText,
+      fldEmail -> nonEmptyText,
+      fldComment -> nonEmptyText
+    ) {(d,u,e,c) => Comment(d,u,e,c,None)} 
+  {c => Some((c.date,c.user,c.user,c.comment))}
+  )
 }

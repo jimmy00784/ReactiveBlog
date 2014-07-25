@@ -1,5 +1,8 @@
 package models
 
+import play.api.data._
+import play.api.data.Forms._
+
 import reactivemongo.bson.{BSONDateTime, BSONObjectID, BSONDocumentWriter, BSONDocumentReader, BSONDocument}
 import models.BSONProducers._
 /**
@@ -49,4 +52,6 @@ object Post {
 	  doc.getAs[List[Comment]](fldComments).getOrElse(List())
 	)
   }
+
+  val form = Form()
 }

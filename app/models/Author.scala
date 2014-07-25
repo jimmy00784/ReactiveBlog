@@ -4,6 +4,10 @@ package models
  * Created by karim on 7/23/14.
  */
 
+import play.api.data._
+import play.api.data.Forms._
+import play.api.data.format.Formats._
+import play.api.data.validation.Constraints._
 import reactivemongo.bson._
 
 case class Author (id: Option[BSONObjectID], name: String, email: String, bio: String)
@@ -30,4 +34,20 @@ object Author {
       doc.getAs[String](fldBio).getOrElse("")
     )
   }
+
+  val form = Form(
+    mapping(
+      fldId -> optional(of[String] verifying pattern(
+        """[a-fA-F0-9]{24}""".r,
+        "constraint.objectId",
+        "error.objectId")),
+      fldName -> nonEmptyText,
+      fldEmail -> nonEmptyText,
+      fldBio -> text) { (id, name, email, bio) => 
+      Author(
+        id.map(BSONObjectID(_)),
+        name,
+        email,
+        bio)
+      }{ author => Some((author.id.map(_.stringify),author.name,author.email,author.bio))})
 }
