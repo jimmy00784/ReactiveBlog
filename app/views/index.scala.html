@@ -1,4 +1,4 @@
-@(authors: List[Author])
+@(authors: List[Author])(author:Form[Author])
 
 @main("Welcome to Play") {
 
@@ -14,10 +14,11 @@
 	</div>
 
 	Add new:<br/>
-	<form action = '@routes.Application.index' method = 'POST'>
-		Name: <input name="name"/>
-		Email:<input name="email"/>
-		Bio:  <textarea name="bio"></textarea>
+	@helper.form(action = routes.Application.add){
+		@helper.inputText(author("name"))
+		@helper.inputText(author("email"))
+		@helper.textarea(author("bio"))
 		<input type="submit" value="submit"/>
+	}
 </form>
 }

@@ -13,21 +13,25 @@ import reactivemongo.api._
 import reactivemongo.bson._
 import reactivemongo.api.collections.default.BSONCollection
 import play.modules.reactivemongo.{MongoController,ReactiveMongoPlugin}
+import play.api.data.Form
 
 object Application extends Controller with MongoController{
 
 	val collAuthor = db[BSONCollection]("author")
 
 	def index = Action.async { implicit request =>
-		val found = collAuthor.find(BSONDocument(
+		val form = Author.form.bindFromRequest
+    partialIndex(form)
+  }
+    
+
+  def partialIndex(form:Form[Author]) =  { 
+    val found = collAuthor.find(BSONDocument(
 			"$query" -> BSONDocument()
 			)).cursor[Author]
 		
 		found.collect[List]().map{
-		//val d = db
-		//val future = Future {1 }
-		//future.map {
-		f => Ok(views.html.index(f))
+		f => Ok(views.html.index(f)(form))
 		}.recover {
 			case e =>
 				e.printStackTrace
@@ -39,8 +43,7 @@ object Application extends Controller with MongoController{
 		Author.form.bindFromRequest.fold(
 			errors => Future.successful(Redirect(routes.Application.index)),
 			author => 
-				collAuthor.insert(author).map(_ =>
-				Redirect(routes.Application.index))
+      collAuthor.insert(author).zip( partialIndex(Author.form.fill(author))).map(_._2)
 			)
 	}
 
