@@ -57,18 +57,18 @@ object Post {
   val form = Form(
 		mapping(
 			fldId -> optional(of[String] verifying pattern(
-				"""[a-fA-F0-9]{24}""".r,
+				Common.objectIdRegEx,
         "constraint.objectId",
         "error.objectId")),
 			fldDate -> date,
 			fldTitle -> nonEmptyText,
 			fldContent -> nonEmptyText,
 			fldBlogId -> nonEmptyText.verifying(pattern(
-				"""[a-fA-F0-9]{24}""".r,
+        Common.objectIdRegEx,
 				"constraint.blogId",
 				"error.blogId")),
 			fldAuthorId -> nonEmptyText.verifying(pattern(
-				"""[a-fA-F0-9]{24}""".r,
+        Common.objectIdRegEx,
 				"constraint.authorId",
 				"error.authorId"))
 			)

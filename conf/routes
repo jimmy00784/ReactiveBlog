@@ -4,7 +4,9 @@
 
 # Home page
 GET     /                           controllers.Application.index
-POST	/add							controllers.Application.add
+POST	/add						controllers.Application.add
+POST    /login                      controllers.Login.authenticate
+GET     /logout                     controllers.Login.logout
 GET		/author						controllers.AuthorController.index
 POST	/author						controllers.AuthorController.submit
 

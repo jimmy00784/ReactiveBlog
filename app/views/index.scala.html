@@ -1,7 +1,9 @@
-@(authors: List[Author])(author:Form[Author])
+@(login: Html)
+@*(authors: List[Author])(author:Form[Author])*@
 
-@main("Welcome to Play") {
-
+@main("Welcome to Play")(login) {
+    Content
+    @*
     Got @authors.size authors
 
 	<div>
@@ -19,6 +21,6 @@
 		@helper.inputText(author("email"))
 		@helper.textarea(author("bio"))
 		<input type="submit" value="submit"/>
-	}
+	}*@
 </form>
 }

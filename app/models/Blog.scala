@@ -45,7 +45,7 @@ object Blog {
 	val form = Form(
 		mapping(
 			fldId -> optional(of[String] verifying pattern(
-				"""[a-fA-F0-9]{24}""".r,
+        Common.objectIdRegEx,
 				"constrant.objectid",
 				"error.objectid")),
 			fldTitle -> nonEmptyText,

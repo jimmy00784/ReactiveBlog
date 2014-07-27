@@ -1,37 +1,47 @@
 package controllers
 
-import models.Comment.CommentWriter
-import models.Post.PostWriter
-import models.{Post, Comment, Author, Response}
-import models.Author.AuthorWriter
-import play.api._
-import play.api.mvc._
-import reactivemongo.bson.{BSONObjectID, BSONDocument}
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import reactivemongo.api._
-import reactivemongo.bson._
-import reactivemongo.api.collections.default.BSONCollection
-import play.modules.reactivemongo.{MongoController,ReactiveMongoPlugin}
+import models.Author
 import play.api.data.Form
+import play.api.mvc._
+import play.modules.reactivemongo.MongoController
+import reactivemongo.api.collections.default.BSONCollection
+import reactivemongo.bson._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object Application extends Controller with MongoController{
 
-	val collAuthor = db[BSONCollection]("author")
+	lazy val collAuthor = db[BSONCollection]("author")
 
-	def index = Action.async { implicit request =>
+	/*def index = Action.async { implicit request =>
 		val form = Author.form.bindFromRequest
     partialIndex(form)
-  }
-    
+  }*/
 
-  def partialIndex(form:Form[Author]) =  { 
+  def index = Action.async { request =>
+    request.session.get("bsonid").map {
+      bsonid =>
+        collAuthor.find(BSONDocument("$query" -> BSONDocument("_id" -> BSONObjectID(bsonid)))).
+          one[Author].map{
+            author =>
+              author match {
+                case Some(a) => Ok(views.html.index(views.html.authenticated(a.name)))
+                case None => Ok(views.html.index(views.html.badlogin("Invalid credentials."))).withNewSession
+              }
+
+        }
+    }.getOrElse {
+      Future.successful(Ok(views.html.index(views.html.loginform())))
+    }
+  }
+
+  def partialIndex(form:Form[Author]) =  {
     val found = collAuthor.find(BSONDocument(
 			"$query" -> BSONDocument()
 			)).cursor[Author]
 		
 		found.collect[List]().map{
-		f => Ok(views.html.index(f)(form))
+		f => Ok //(views.html.index(f)(form))
 		}.recover {
 			case e =>
 				e.printStackTrace
