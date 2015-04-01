@@ -6,9 +6,9 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.data.validation._
 import play.api.mvc.{Action,Controller}
-import play.modules.reactivemongo.MongoController
-import reactivemongo.api.collections.default.BSONCollection
-import reactivemongo.bson.BSONDocument
+import play.modules.reactivemongo._
+import reactivemongo.api.collections.default._
+import reactivemongo.bson._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
@@ -18,22 +18,22 @@ import scala.concurrent.Future
  */
 object Login extends Controller with MongoController {
 
-  lazy val collLogin = db[BSONCollection]("users")
-  lazy val collAuthor = db[BSONCollection]("author")
+  lazy val collLogin = db("users")
+  lazy val collAuthor = db("author")
 
-  val loginForm = Form(
+  val loginForm:Form[(String,String)] = Form(
     mapping(
-      "name" -> nonEmptyText,
-      "password" -> nonEmptyText
-    )
-    {(name,password) => (name -> password)}
-    {(loginInfo) => Some((loginInfo._1,loginInfo._2))}
+      "name"->nonEmptyText,
+      "password"->nonEmptyText
+      )
+      {(name:String,password:String) => (name -> password)}
+      {(loginInfo:(String, String)) => Some((loginInfo._1,loginInfo._2))}
   )
   def authenticate = Action.async { implicit  request =>
     loginForm.bindFromRequest.fold(
       errors => Future.successful(Redirect(routes.Application.index)),
       loginInfo => {
-        val futLog = collLogin.find(BSONDocument("$query" ->
+        val futLog = collLogin.find(BSONDocument( "$query" ->
           BSONDocument(
             "user" -> loginInfo._1,
             "password" -> loginInfo._2
@@ -59,6 +59,6 @@ object Login extends Controller with MongoController {
     )
   }
   def logout = Action {
-    Redirect("/").withNewSession
+    Redirect("/",null).withNewSession
   }
 }

@@ -3,22 +3,22 @@ package controllers
 import models.Author
 import play.api.data.Form
 import play.api.mvc._
-import play.modules.reactivemongo.MongoController
-import reactivemongo.api.collections.default.BSONCollection
+import play.modules.reactivemongo._
+import reactivemongo.api.collections.default._
 import reactivemongo.bson._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object Application extends Controller with MongoController{
 
-	lazy val collAuthor = db[BSONCollection]("author")
+	lazy val collAuthor = db("author")
 
 	/*def index = Action.async { implicit request =>
 		val form = Author.form.bindFromRequest
     partialIndex(form)
   }*/
 
-  def index = Action.async { request =>
+  def index = Action.async { implicit request =>
     request.session.get("bsonid").map {
       bsonid =>
         collAuthor.find(BSONDocument("$query" -> BSONDocument("_id" -> BSONObjectID(bsonid)))).
