@@ -30,7 +30,7 @@ object Login extends Controller with MongoController {
       {(loginInfo:(String, String)) => Some((loginInfo._1,loginInfo._2))}
   )
   def authenticate = Action.async { implicit  request =>
-    loginForm.bindFromRequest.fold(
+    val r = loginForm.bindFromRequest.fold(
       errors => Future.successful(Redirect(routes.Application.index)),
       loginInfo => {
         val futLog = collLogin.find(BSONDocument( "$query" ->
@@ -57,6 +57,7 @@ object Login extends Controller with MongoController {
         }
       }
     )
+    r
   }
   def logout = Action {
     Redirect("/",null).withNewSession

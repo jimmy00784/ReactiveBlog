@@ -33,6 +33,7 @@ object Application extends Controller with MongoController{
     }.getOrElse {
       Future.successful(Ok(views.html.index(views.html.loginform())))
     }
+
   }
 
   def partialIndex(form:Form[Author]) =  {

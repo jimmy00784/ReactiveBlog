@@ -1,6 +1,15 @@
 @(lstAuthors: List[Author])
   You have @lstAuthors.size authors
 
+<div>
+  @for(author <- lstAuthors){
+  id: @author.id <br/>
+  name: @author.name<br/>
+  email: @author.email<br/>
+  bio: @author.bio<br/><br/>
+  }
+</div>
+
   @helper.form(action = routes.AuthorController.submit()){
     Name: <input name="name"/><br/>
 	Email: <input name="email"/><br/>
