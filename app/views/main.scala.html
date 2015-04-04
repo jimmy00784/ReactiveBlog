@@ -1,6 +1,4 @@
-@(title: String)(login: Html)(content: Html)
-
-<!DOCTYPE html>
+@(title: String)(login: Html)(sidebar:Html)(content: Html)
 
 <html>
     <head>
@@ -15,7 +13,7 @@
         <div class="sitecontainer">
             <div class="header">@header(login)</div>
             <div class="contentcontainer">
-                <div class="sidebar">@sidebar()</div>
+                <div class="sidebar">@sidebar</div>
                 <div class="content">@content</div>
             </div>
             <div class="footer">@footer()</div>

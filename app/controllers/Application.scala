@@ -21,17 +21,32 @@ object Application extends Controller with MongoController{
   def index = Action.async { implicit request =>
     request.session.get("bsonid").map {
       bsonid =>
-        collAuthor.find(BSONDocument("$query" -> BSONDocument("_id" -> BSONObjectID(bsonid)))).
-          one[Author].map{
+
+        if(bsonid == "badid") {
+          request.session.-("bsonid")
+          Future.successful((views.html.badlogin("Invalid credentials."), false))
+        }
+        else {
+          collAuthor.find(BSONDocument("$query" -> BSONDocument("_id" -> BSONObjectID(bsonid)))).
+            one[Author].map {
             author =>
               author match {
-                case Some(a) => Ok(views.html.index(views.html.authenticated(a.name)))
-                case None => Ok(views.html.index(views.html.badlogin("Invalid credentials."))).withNewSession
+                case Some(a) => (views.html.authenticated(a.name), true)
+                case None => (views.html.badlogin("Invalid credentials."), false)
               }
 
+          }
         }
     }.getOrElse {
-      Future.successful(Ok(views.html.index(views.html.loginform())))
+      Future.successful((views.html.loginform(),false))
+    }.map{
+      login =>
+        val (loginHtml,keepSession) = login
+        val result = Ok(views.html.index(loginHtml)(views.html.sidebar()))
+        if(keepSession)
+          result
+        else
+          result.withNewSession
     }
 
   }

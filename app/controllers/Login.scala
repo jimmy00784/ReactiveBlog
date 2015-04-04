@@ -7,6 +7,7 @@ import play.api.data.Forms._
 import play.api.data.validation._
 import play.api.mvc.{Action,Controller}
 import play.modules.reactivemongo._
+import play.twirl.api.Html
 import reactivemongo.api.collections.default._
 import reactivemongo.bson._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,8 +31,8 @@ object Login extends Controller with MongoController {
       {(loginInfo:(String, String)) => Some((loginInfo._1,loginInfo._2))}
   )
   def authenticate = Action.async { implicit  request =>
-    val r = loginForm.bindFromRequest.fold(
-      errors => Future.successful(Redirect(routes.Application.index)),
+    val futlogin:Future[Option[String]] = loginForm.bindFromRequest.fold(
+      errors => Future.successful(None),
       loginInfo => {
         val futLog = collLogin.find(BSONDocument( "$query" ->
           BSONDocument(
@@ -48,16 +49,23 @@ object Login extends Controller with MongoController {
             aut match {
               case Some(a) => {
                 val user = models.Author.AuthorReader.read(a)
-                Ok(views.html.index(views.html.authenticated(user.name))).withSession("bsonid" -> user.id.get.stringify)
+                Some(user.id.get.stringify)
               }
-              case None => Ok(views.html.index(views.html.badlogin("Invalid credentials."))).withNewSession
+              case None => None
             }
           }
-          case None => Ok(views.html.index(views.html.badlogin("Invalid credentials."))).withNewSession
+          case None => None
         }
       }
     )
-    r
+    futlogin.map{
+      login =>
+        val result = Redirect("/",null)
+        login match {
+          case Some(userid) => result.withSession("bsonid" -> userid)
+          case None => result.withSession("bsonid" -> "badid")
+        }
+    }
   }
   def logout = Action {
     Redirect("/",null).withNewSession

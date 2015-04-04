@@ -1,7 +1,7 @@
-@(login: Html)
+@(login: Html)(sidebar: Html)
 @*(authors: List[Author])(author:Form[Author])*@
 
-@main("Welcome to Play")(login) {
+@main("Welcome to Play")(login)(sidebar) {
     Content
     @*
     Got @authors.size authors
