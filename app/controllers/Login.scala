@@ -34,10 +34,11 @@ object Login extends Controller with MongoController {
     val futlogin:Future[Option[String]] = loginForm.bindFromRequest.fold(
       errors => Future.successful(None),
       loginInfo => {
+        val (login,password) = loginInfo
         val futLog = collLogin.find(BSONDocument( "$query" ->
           BSONDocument(
-            "user" -> loginInfo._1,
-            "password" -> loginInfo._2
+            "user" -> login,
+            "password" -> password
           ))).one
         val futAut = (email: String) => collAuthor.find(BSONDocument("$query" ->
               BSONDocument("email" -> email))).one

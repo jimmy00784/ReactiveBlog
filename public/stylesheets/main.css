@@ -32,6 +32,7 @@ body {
 .sidebar {
     width: 150px;
     display: inline-block;
+    float: left;
 }
 
 .content {

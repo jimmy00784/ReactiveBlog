@@ -16,12 +16,34 @@ object AuthorController extends Controller with MongoController {
 
   def index = Action.async { implicit request =>
 
-		collAuthor.find(BSONDocument()).cursor[Author].collect[List]().map{
+		val authorhtmlfut = collAuthor.find(BSONDocument()).cursor[Author].collect[List]().map{
 			list =>
-				Ok(views.html.author(list))
+				views.html.author(list)
 		}
+
+		for{
+			authorpage <- authorhtmlfut
+			page <- Application.generatePage(request,authorpage)
+		} yield page
 		//Ok(views.html.author(List()))
   }
+
+	def get(authorid: String) = Action.async { implicit request =>
+		val authorhtmlfut = collAuthor.find(BSONDocument("_id" -> BSONObjectID(authorid))).cursor[Author].collect[List]().map{
+			list =>
+				views.html.author(list)
+		}
+
+		for{
+			authorpage <- authorhtmlfut
+			page <- Application.generatePage(request,authorpage)
+		} yield page
+
+	}
+
+	def delete(authorid: String) = Action.async { implicit request =>
+		Future.successful(Ok)
+	}
 
 	def submit = Action.async { implicit request =>
 		Author.form.bindFromRequest.fold(

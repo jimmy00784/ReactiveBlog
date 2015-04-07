@@ -3,12 +3,20 @@
 
 <div>
   @for(author <- lstAuthors){
-  id: @author.id <br/>
-  name: @author.name<br/>
-  email: @author.email<br/>
-  bio: @author.bio<br/><br/>
+  <div>id: @author.id.get.stringify
+    @helper.form(
+    action = routes.AuthorController.delete(author.id.get.stringify), 'method -> "DELETE"){
+    <button>Delete</button>
+    }
+  </div>
+  <div>Name: @author.name</div>
+  <div>Email: @author.email</div>
+  <div>Bio: @author.bio</div>
+  <div>Pic: @author.pic</div>
+  <br/>
   }
 </div>
+
 
   @helper.form(action = routes.AuthorController.submit()){
     Name: <input name="name"/><br/>
