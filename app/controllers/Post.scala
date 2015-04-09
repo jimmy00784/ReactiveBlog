@@ -45,4 +45,11 @@ object Post extends Controller with MongoController{
     Ok(views.html.newpost())
   }
 
+  def bytag(tag:String) = Action.async { implicit request =>
+    collPosts.find(BSONDocument("tags" -> tag)).cursor[models.Post].collect[List]().map{
+      posts =>
+        Ok(views.html.posts(posts))
+    }
+  }
+
 }
