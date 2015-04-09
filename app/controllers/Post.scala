@@ -15,16 +15,15 @@ object Post extends Controller with MongoController{
   lazy val collPosts = db("posts")
 
   def index = Action.async { implicit request =>
-    collPosts.find(BSONDocument()).cursor[models.Post].collect[List]().map{
-      posts =>
-        Ok(views.html.posts(posts))
-    }
+    search(BSONDocument())
   }
 
   def submit = Action.async { implicit request =>
+
     models.Post.form.bindFromRequest.fold(
       hasErrors => Future.successful(Redirect(routes.Post.index())),
       post => {
+
         collPosts.save(post)
         Future.successful(Redirect(routes.Post.index()))
       }
@@ -32,13 +31,7 @@ object Post extends Controller with MongoController{
   }
 
   def get(postid:String) = Action.async { implicit request =>
-    collPosts.find(BSONDocument("_id" -> BSONObjectID(postid))).one[models.Post].map{
-      optPost =>
-        optPost match {
-          case Some(post) => Ok(views.html.posts(List(post)))
-          case None => Redirect(routes.Post.index())
-        }
-    }
+    search(BSONDocument("_id" -> BSONObjectID(postid)))
   }
 
   def newpost = Action {
@@ -46,7 +39,15 @@ object Post extends Controller with MongoController{
   }
 
   def bytag(tag:String) = Action.async { implicit request =>
-    collPosts.find(BSONDocument("tags" -> tag)).cursor[models.Post].collect[List]().map{
+    search(BSONDocument("tags" -> tag))
+  }
+
+  def byauthor(authorid:String) = Action.async { implicit request =>
+    search(BSONDocument("authorid" -> BSONObjectID(authorid)))
+  }
+
+  def search(selector:BSONDocument) = {
+    collPosts.find(selector).cursor[models.Post].collect[List]().map{
       posts =>
         Ok(views.html.posts(posts))
     }

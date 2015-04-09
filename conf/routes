@@ -12,6 +12,7 @@ GET     /author/:authorid           controllers.Author.get(authorid: String)
 POST	/author						controllers.Author.submit
 DELETE  /author/:authorid           controllers.Author.delete(authorid: String)
 GET     /posts                      controllers.Post.index
+GET     /posts/byauthor/:authorid   controllers.Post.byauthor(authorid:String)
 GET     /post/new                   controllers.Post.newpost
 GET     /post/:postid               controllers.Post.get(postid:String)
 POST    /post                       controllers.Post.submit

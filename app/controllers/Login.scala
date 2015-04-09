@@ -1,7 +1,5 @@
 package controllers
 
-//import models.Author
-//import models.Author.{AuthorReader, AuthorWriter}
 import play.api.data._
 import play.api.data.Forms._
 import play.api.data.validation._
@@ -22,26 +20,14 @@ object Login extends Controller with MongoController {
   lazy val collLogin = db("users")
   lazy val collAuthor = db("author")
 
-  val loginForm:Form[(String,String)] = Form(
-    mapping(
-      "name"->nonEmptyText,
-      "password"->nonEmptyText
-      )
-      {(name:String,password:String) => (name -> password)}
-      {(loginInfo:(String, String)) => Some((loginInfo._1,loginInfo._2))}
-  )
   def authenticate = Action.async { implicit  request =>
-    val futlogin:Future[Option[String]] = loginForm.bindFromRequest.fold(
-      errors => Future.successful(None),
-      loginInfo => {
-        val (login,password) = loginInfo
-        val futLog = collLogin.find(BSONDocument( "$query" ->
-          BSONDocument(
-            "user" -> login,
-            "password" -> password
-          ))).one
-        val futAut = (email: String) => collAuthor.find(BSONDocument("$query" ->
-              BSONDocument("email" -> email))).one
+    val futlogin = models.User.form.bindFromRequest.fold(
+      errors => {
+        Future.successful(None)
+      },
+      login => {
+        val futLog = collLogin.find(BSONDocument("user" -> login.user,"password" -> login.password)).one
+        val futAut = (email: String) => collAuthor.find(BSONDocument("email" -> email)).one
         for {
           log <- futLog
           aut <- futAut(log.map { case l => l.getAs[String]("user").getOrElse("") }.getOrElse(""))
@@ -60,12 +46,13 @@ object Login extends Controller with MongoController {
       }
     )
     futlogin.map{
-      login =>
-        val result = Redirect("/",null)
+      login => {
+        val result = Redirect("/", null)
         login match {
           case Some(userid) => result.withSession("bsonid" -> userid)
           case None => result.withSession("bsonid" -> "badid")
         }
+      }
     }
   }
   def logout = Action {

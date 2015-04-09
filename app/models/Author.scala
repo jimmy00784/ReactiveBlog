@@ -4,7 +4,7 @@ package models
  * Created by karim on 7/23/14.
  */
 
-import play.api.data._
+import play.api.data.{Form, Mapping}
 import play.api.data.Forms._
 import play.api.data.format.Formats._
 import play.api.data.validation.Constraints._
@@ -53,6 +53,8 @@ object Author {
         name,
         email,
         bio,
-        pic)
-      }{ author => Some((author.id.map(_.stringify),author.name,author.email,author.bio,author.pic))})
+        pic
+      )
+    }{ author => Some(author.id.map(_.stringify),author.name, author.email,author.bio,author.pic)}
+  )
 }

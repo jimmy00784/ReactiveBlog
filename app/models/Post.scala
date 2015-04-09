@@ -91,5 +91,5 @@ object Post {
 					(post.id.map(_.stringify),post.date,post.title,post.content/*,post.blogid.stringify*/,post.authorid.stringify,post.tags.mkString(", "))
 				)
 			}
-			)
+	)
 }
