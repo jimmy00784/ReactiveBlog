@@ -5,7 +5,7 @@
   @for(author <- lstAuthors){
   <div>id: @author.id.get.stringify
     @helper.form(
-    action = routes.AuthorController.delete(author.id.get.stringify), 'method -> "DELETE"){
+    action = routes.Author.delete(author.id.get.stringify), 'method -> "DELETE"){
     <button>Delete</button>
     }
   </div>
@@ -18,7 +18,7 @@
 </div>
 
 
-  @helper.form(action = routes.AuthorController.submit()){
+  @helper.form(action = routes.Author.submit()){
     Name: <input name="name"/><br/>
 	Email: <input name="email"/><br/>
 	Bio:<br/>

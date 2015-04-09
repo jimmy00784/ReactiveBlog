@@ -10,11 +10,12 @@ import models.BSONProducers._
  * Created by karim on 7/23/14.
  */
 case class Post (id:Option[BSONObjectID],
-                 date:java.util.Date,
+                 date:Option[java.util.Date],
                  title:String,
                  content:String,
-                 blogid:BSONObjectID,
+                 //blogid:BSONObjectID,
                  authorid:BSONObjectID,
+								 authorname:String,
                  tags:List[String],
                  comments:List[Comment])
 
@@ -23,7 +24,7 @@ object Post {
   val fldDate = "date"
   val fldTitle = "title"
   val fldContent = "content"
-  val fldBlogId = "blogid"
+  //val fldBlogId = "blogid"
   val fldAuthorId = "authorid"
   val fldTags = "tags"
   val fldComments = "comments"
@@ -31,10 +32,10 @@ object Post {
   implicit object PostWriter extends BSONDocumentWriter[Post] {
 	def write(post:Post):BSONDocument = BSONDocument(
 	  fldId -> post.id.getOrElse(BSONObjectID.generate),
-	  fldDate -> post.date,
+	  fldDate -> post.date.getOrElse(new java.util.Date()),
 	  fldTitle -> post.title,
 	  fldContent -> post.content,
-	  fldBlogId -> post.blogid,
+	  //fldBlogId -> post.blogid,
 	  fldAuthorId -> post.authorid,
 	  fldTags -> post.tags,
 	  fldComments -> post.comments
@@ -44,11 +45,12 @@ object Post {
   implicit object PostReader extends BSONDocumentReader[Post] {
 	def read(doc:BSONDocument):Post = Post(
 	  doc.getAs[BSONObjectID](fldId),
-	  doc.getAs[java.util.Date](fldDate).get,
+	  doc.getAs[java.util.Date](fldDate),
 	  doc.getAs[String](fldTitle).get,
 	  doc.getAs[String](fldContent).get,
-	  doc.getAs[BSONObjectID](fldBlogId).get,
+	  //doc.getAs[BSONObjectID](fldBlogId).get,
 	  doc.getAs[BSONObjectID](fldAuthorId).get,
+		"",
 	  doc.getAs[List[String]](fldTags).getOrElse(List()),
 	  doc.getAs[List[Comment]](fldComments).getOrElse(List())
 	)
@@ -60,31 +62,33 @@ object Post {
 				Common.objectIdRegEx,
         "constraint.objectId",
         "error.objectId")),
-			fldDate -> date,
+			fldDate -> optional(of[java.util.Date]),
 			fldTitle -> nonEmptyText,
 			fldContent -> nonEmptyText,
-			fldBlogId -> nonEmptyText.verifying(pattern(
+			/*fldBlogId -> nonEmptyText.verifying(pattern(
         Common.objectIdRegEx,
 				"constraint.blogId",
-				"error.blogId")),
+				"error.blogId")),*/
 			fldAuthorId -> nonEmptyText.verifying(pattern(
         Common.objectIdRegEx,
 				"constraint.authorId",
-				"error.authorId"))
+				"error.authorId")),
+			fldTags -> text
 			)
-			{ (id,date,title,content,blogId,authorId) => Post(
+			{ (id,date,title,content/*,blogId*/,authorId,tags) => Post(
 				id.map(BSONObjectID(_)),
 				date,
 				title,
 				content,
-				BSONObjectID(blogId),
+				//BSONObjectID(blogId),
 				BSONObjectID(authorId),
-				List(),
+				"",
+				tags.split(",").foldLeft(List[String]()){(c,e) => e.trim :: c},
 				List())
 			}
 			{
 				post => Some(
-					(post.id.map(_.stringify),post.date,post.title,post.content,post.blogid.stringify,post.authorid.stringify)
+					(post.id.map(_.stringify),post.date,post.title,post.content/*,post.blogid.stringify*/,post.authorid.stringify,post.tags.mkString(", "))
 				)
 			}
 			)

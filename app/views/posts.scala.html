@@ -1,0 +1,22 @@
+@(posts:List[Post])
+@for(post <- posts){
+    <div><a href="@routes.Post.get(post.id.get.stringify)">@post.id.get.stringify</a></div>
+    <div>@post.date @post.title</div>
+    <div>By: @post.authorname</div>
+    <div>@post.content</div>
+    @if(!post.tags.isEmpty){
+        <div>Tags:
+            @for(tag <- post.tags){
+                @{tag + " "}
+            }
+        </div>
+    }
+    @if(!post.comments.isEmpty){
+        <div>Comments:
+            @for(comment <- post.comments){
+                <div>@comment.date @comment.user @comment.email</div>
+                <div>@comment.comment</div>
+            }
+        </div>
+    }
+}

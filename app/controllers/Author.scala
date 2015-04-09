@@ -1,6 +1,5 @@
 package controllers
 
-import models.Author
 import play.api.data.Form
 import play.api.mvc._
 import play.modules.reactivemongo._
@@ -10,13 +9,13 @@ import reactivemongo.bson._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object AuthorController extends Controller with MongoController {
+object Author extends Controller with MongoController {
 
 	lazy val collAuthor = db("author")
 
   def index = Action.async { implicit request =>
 
-		val authorhtmlfut = collAuthor.find(BSONDocument()).cursor[Author].collect[List]().map{
+		val authorhtmlfut = collAuthor.find(BSONDocument()).cursor[models.Author].collect[List]().map{
 			list =>
 				views.html.author(list)
 		}
@@ -29,7 +28,7 @@ object AuthorController extends Controller with MongoController {
   }
 
 	def get(authorid: String) = Action.async { implicit request =>
-		val authorhtmlfut = collAuthor.find(BSONDocument("_id" -> BSONObjectID(authorid))).cursor[Author].collect[List]().map{
+		val authorhtmlfut = collAuthor.find(BSONDocument("_id" -> BSONObjectID(authorid))).cursor[models.Author].collect[List]().map{
 			list =>
 				views.html.author(list)
 		}
@@ -46,11 +45,11 @@ object AuthorController extends Controller with MongoController {
 	}
 
 	def submit = Action.async { implicit request =>
-		Author.form.bindFromRequest.fold(
-			hasErrors => Future.successful(Redirect(routes.AuthorController.index())),
+		models.Author.form.bindFromRequest.fold(
+			hasErrors => Future.successful(Redirect(routes.Author.index())),
 			author => {
 				collAuthor.save(author)
-				Future.successful(Redirect(routes.AuthorController.index()))
+				Future.successful(Redirect(routes.Author.index()))
 			}
 		)
 

@@ -1,0 +1,7 @@
+@helper.form(action = routes.Post.submit()){
+    <div>Title: <input name="title"/></div>
+    <div>Content: <textarea name="content" rows="20" cols="30"></textarea></div>
+    <div>Author: <input name="authorid"/></div>
+    <div>Tags: <input name="tags"/></div>
+    <div><button type="submit">Submit</button> </div>
+}

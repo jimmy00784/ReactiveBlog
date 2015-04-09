@@ -1,6 +1,5 @@
 package controllers
 
-import models.Author
 import play.api.data.Form
 import play.api.mvc._
 import play.modules.reactivemongo._
@@ -50,7 +49,7 @@ object Application extends Controller with MongoController{
         }
         else {
           collAuthor.find(BSONDocument("$query" -> BSONDocument("_id" -> BSONObjectID(bsonid)))).
-            one[Author].map {
+            one[models.Author].map {
             author =>
               author match {
                 case Some(a) => LoggedInUser(bsonid,a.name)
@@ -84,10 +83,10 @@ object Application extends Controller with MongoController{
 
   }
 
-  def partialIndex(form:Form[Author]) =  {
+  def partialIndex(form:Form[models.Author]) =  {
     val found = collAuthor.find(BSONDocument(
 			"$query" -> BSONDocument()
-			)).cursor[Author]
+			)).cursor[models.Author]
 		
 		found.collect[List]().map{
 		f => Ok //(views.html.index(f)(form))
@@ -99,10 +98,10 @@ object Application extends Controller with MongoController{
 	}
 
 	def add = Action.async { implicit request =>
-		Author.form.bindFromRequest.fold(
+		models.Author.form.bindFromRequest.fold(
 			errors => Future.successful(Redirect(routes.Application.index)),
 			author => 
-      collAuthor.insert(author).zip( partialIndex(Author.form.fill(author))).map(_._2)
+      collAuthor.insert(author).zip( partialIndex(models.Author.form.fill(author))).map(_._2)
 			)
 	}
 

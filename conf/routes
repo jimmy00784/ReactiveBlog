@@ -7,10 +7,14 @@ GET     /                           controllers.Application.index
 POST	/add						controllers.Application.add
 POST    /login                      controllers.Login.authenticate
 GET     /logout                     controllers.Login.logout
-GET		/authors					controllers.AuthorController.index
-GET     /author/:authorid           controllers.AuthorController.get(authorid: String)
-POST	/author						controllers.AuthorController.submit
-DELETE  /author/:authorid           controllers.AuthorController.delete(authorid: String)
+GET		/authors					controllers.Author.index
+GET     /author/:authorid           controllers.Author.get(authorid: String)
+POST	/author						controllers.Author.submit
+DELETE  /author/:authorid           controllers.Author.delete(authorid: String)
+GET     /posts                      controllers.Post.index
+GET     /post/new                   controllers.Post.newpost
+GET     /post/:postid               controllers.Post.get(postid:String)
+POST    /post                       controllers.Post.submit
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
