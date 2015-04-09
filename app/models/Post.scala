@@ -26,6 +26,7 @@ object Post {
   val fldContent = "content"
   //val fldBlogId = "blogid"
   val fldAuthorId = "authorid"
+	val fldAuthorName = "authorname"
   val fldTags = "tags"
   val fldComments = "comments"
 
@@ -37,6 +38,7 @@ object Post {
 	  fldContent -> post.content,
 	  //fldBlogId -> post.blogid,
 	  fldAuthorId -> post.authorid,
+		fldAuthorName -> post.authorname,
 	  fldTags -> post.tags,
 	  fldComments -> post.comments
 	)
@@ -50,7 +52,7 @@ object Post {
 	  doc.getAs[String](fldContent).get,
 	  //doc.getAs[BSONObjectID](fldBlogId).get,
 	  doc.getAs[BSONObjectID](fldAuthorId).get,
-		"",
+		doc.getAs[String](fldAuthorName).get,
 	  doc.getAs[List[String]](fldTags).getOrElse(List()),
 	  doc.getAs[List[Comment]](fldComments).getOrElse(List())
 	)
@@ -69,26 +71,23 @@ object Post {
         Common.objectIdRegEx,
 				"constraint.blogId",
 				"error.blogId")),*/
-			fldAuthorId -> nonEmptyText.verifying(pattern(
-        Common.objectIdRegEx,
-				"constraint.authorId",
-				"error.authorId")),
+			//fldAuthorId -> text,
 			fldTags -> text
 			)
-			{ (id,date,title,content/*,blogId*/,authorId,tags) => Post(
+			{ (id,date,title,content/*,blogId,authorId*/,tags) => Post(
 				id.map(BSONObjectID(_)),
 				date,
 				title,
 				content,
 				//BSONObjectID(blogId),
-				BSONObjectID(authorId),
+				BSONObjectID.generate,
 				"",
 				tags.split(",").foldLeft(List[String]()){(c,e) => e.trim :: c},
 				List())
 			}
 			{
 				post => Some(
-					(post.id.map(_.stringify),post.date,post.title,post.content/*,post.blogid.stringify*/,post.authorid.stringify,post.tags.mkString(", "))
+					(post.id.map(_.stringify),post.date,post.title,post.content/*,post.blogid.stringify,post.authorid.stringify*/,post.tags.mkString(", "))
 				)
 			}
 	)

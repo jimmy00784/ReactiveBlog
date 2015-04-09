@@ -3,6 +3,7 @@ package controllers
 import play.api.data.Form
 import play.api.mvc._
 import play.modules.reactivemongo._
+import play.twirl.api.Html
 import reactivemongo.api._
 import reactivemongo.api.collections.default._
 import reactivemongo.bson._
@@ -20,10 +21,23 @@ object Author extends Controller with MongoController {
 				views.html.author(list)
 		}
 
-		for{
+		val futauthpage = for{
+			user <- Application.getLoggedInUser(request)
 			authorpage <- authorhtmlfut
-			page <- Application.generatePage(request,authorpage)
-		} yield page
+			//page <- Application.generatePage(request,authorpage,false)
+		} yield {
+			user match {
+				case Application.LoggedInUser(userid,username) => views.html.aggregator(authorpage)(views.html.newauthor())
+				case _ => authorpage
+			}
+		}
+
+		for {
+			authorpage <- futauthpage
+			page <- Application.generatePage(request,authorpage,false)
+		} yield {
+			page
+		}
 		//Ok(views.html.author(List()))
   }
 

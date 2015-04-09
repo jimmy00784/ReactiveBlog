@@ -23,22 +23,32 @@ object Application extends Controller with MongoController{
     partialIndex(form)
   }*/
 
-  def generatePage(request:Request[AnyContent],content:Html): Future[Result] = {
+  def generatePage(request:Request[AnyContent],content:Html,authNeeded:Boolean = true): Future[Result] = {
+    generatePage(request,(Unit) => {content},authNeeded)
+  }
+
+  def generatePage(request:Request[AnyContent],func:(Unit => Html),authNeeded:Boolean): Future[Result] = {
     for {
       user <- getLoggedInUser(request)
       loginHtml <- getLoginHtmlFuture(request)
       sidebarHtml <- getSidebarHtmlFuture(request,user)
     } yield {
       val result = views.html.index(loginHtml)(sidebarHtml)_
-      user match {
-        case LoggedInUser(userid,username) => Ok(result(content))
-        case _ => Ok(result(Html(""))).withNewSession
+      lazy val content = func(Unit)
+      if(authNeeded) {
+        user match {
+          case LoggedInUser(userid, username) => Ok(result(content))
+          case _ => Ok(result(Html("Authentication Required!!!"))).withNewSession
+        }
+      }
+      else {
+        Ok(result(content))
       }
     }
   }
 
   def index = Action.async { implicit request =>
-    generatePage(request,Html(""))
+    generatePage(request,Html(""),false)
   }
 
   def getLoggedInUser = { request:Request[AnyContent] =>
@@ -78,7 +88,7 @@ object Application extends Controller with MongoController{
   def getSidebarHtmlFuture = { (request:Request[AnyContent],user:User) =>
     user match {
       case LoggedInUser(userid,username) => Future successful views.html.sidebar()
-      case _ => Future successful views.html.blank()
+      case _ => Future successful views.html.sidebar()
     }
 
   }
