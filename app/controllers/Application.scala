@@ -24,17 +24,24 @@ object Application extends Controller with MongoController{
   }*/
 
   def generatePage(request:Request[AnyContent],content:Html,authNeeded:Boolean = true): Future[Result] = {
-    generatePage(request,(Unit) => {content},authNeeded)
+    generatePage(request,() => {Future.successful(content)},authNeeded)
   }
 
-  def generatePage(request:Request[AnyContent],func:(Unit => Html),authNeeded:Boolean): Future[Result] = {
-    for {
+  def generatePage(request:Request[AnyContent],func:(() => Future[Html]),authNeeded:Boolean): Future[Result] = {
+    val step1 = for {
       user <- getLoggedInUser(request)
       loginHtml <- getLoginHtmlFuture(request)
       sidebarHtml <- getSidebarHtmlFuture(request,user)
     } yield {
-      val result = views.html.index(loginHtml)(sidebarHtml)_
-      lazy val content = func(Unit)
+      val result = views.html.index(loginHtml)(sidebarHtml) _
+      (user -> result)
+    }
+
+    for {
+      partial <- step1
+      content <- func()
+    } yield {
+      val (user,result) = partial
       if(authNeeded) {
         user match {
           case LoggedInUser(userid, username) => Ok(result(content))
@@ -46,6 +53,26 @@ object Application extends Controller with MongoController{
       }
     }
   }
+
+  /*def generatePage(request:Request[AnyContent],func:(() => Html),authNeeded:Boolean): Future[Result] = {
+    for {
+      user <- getLoggedInUser(request)
+      loginHtml <- getLoginHtmlFuture(request)
+      sidebarHtml <- getSidebarHtmlFuture(request,user)
+    } yield {
+      val result = views.html.index(loginHtml)(sidebarHtml)_
+      lazy val content = func()
+      if(authNeeded) {
+        user match {
+          case LoggedInUser(userid, username) => Ok(result(content))
+          case _ => Ok(result(Html("Authentication Required!!!"))).withNewSession
+        }
+      }
+      else {
+        Ok(result(content))
+      }
+    }
+  }*/
 
   def index = Action.async { implicit request =>
     generatePage(request,Html(""),false)

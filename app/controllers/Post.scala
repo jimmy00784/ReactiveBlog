@@ -2,6 +2,7 @@ package controllers
 
 import play.modules.reactivemongo._
 import play.api.mvc._
+import play.twirl.api.Html
 import reactivemongo.api.collections.default._
 import reactivemongo.bson._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,8 +48,29 @@ object Post extends Controller with MongoController{
     }
   }
 
+  def comment(postid:String) = Action.async { implicit request =>
+    models.Comment.form.bindFromRequest.fold(
+      hasErrors => Future.successful(Redirect(routes.Post.get(postid))),
+      comment => {
+        collPosts.update(BSONDocument("_id" -> BSONObjectID(postid)), BSONDocument("$push" -> BSONDocument("comments" -> comment))).map {
+          error =>
+            error
+            Redirect(routes.Post.get(postid))
+        }
+      }
+    )
+  }
+
   def get(postid:String) = Action.async { implicit request =>
-    searchResults(request,BSONDocument("_id" -> BSONObjectID(postid)))
+    Application.generatePage(request, () =>  {
+      collPosts.find(BSONDocument("_id" -> BSONObjectID(postid))).one[models.Post].map{
+        optpost =>
+          optpost.map {
+            case post => views.html.aggregator(views.html.singlepost(post))(views.html.comments(post))
+          }.getOrElse(Html("Not Found"))
+      }
+    },false)
+    //Future.successful(Ok)
   }
 
   def newpost = Action.async { implicit request =>

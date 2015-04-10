@@ -66,7 +66,5 @@ object Author extends Controller with MongoController {
 				Future.successful(Redirect(routes.Author.index()))
 			}
 		)
-
 	}
-
 }

@@ -1,0 +1,17 @@
+@(post:Post)
+@if(!post.comments.isEmpty){
+<div>Comments:
+    @for(comment <- post.comments){
+    <div>@comment.date.get @comment.user @comment.email</div>
+    <div>@comment.comment</div>
+    }
+</div>
+}
+
+@helper.form(action = routes.Post.comment(post.id.get.stringify)){
+Name: <input name="user"/><br/>
+Email: <input name="email"/><br/>
+Comment:<br/>
+<textarea rows="10" cols="20" name="comment"></textarea>
+<button>Submit</button>
+}

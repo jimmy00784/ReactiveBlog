@@ -16,6 +16,7 @@ GET     /posts/byauthor/:authorid   controllers.Post.byauthor(authorid:String)
 GET     /post/new                   controllers.Post.newpost
 GET     /post/:postid               controllers.Post.get(postid:String)
 POST    /post                       controllers.Post.submit
+POST    /post/:postid/comment       controllers.Post.comment(postid:String)
 GET     /tag/:tag                   controllers.Post.bytag(tag:String)
 
 # Map static resources from the /public folder to the /assets URL path

@@ -1,0 +1,13 @@
+@(post:Post)
+<div><a href="@routes.Post.get(post.id.get.stringify)">@post.title</a></div>
+<div>By: <a href="@routes.Post.byauthor(post.authorid.stringify)">@post.authorname</a></div>
+<div>@post.date</div>
+<div>&nbsp;</div>
+<div>@post.content</div>
+@if(!post.tags.isEmpty){
+<div>Tags:
+    @for(tag <- post.tags){
+    <a href="@routes.Post.bytag(tag)">@tag</a>&nbsp;
+    }
+</div>
+}
