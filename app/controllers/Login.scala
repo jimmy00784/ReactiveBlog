@@ -21,6 +21,7 @@ object Login extends Controller with MongoController {
   lazy val collAuthor = db("author")
 
   def authenticate = Action.async { implicit  request =>
+    val referer = request.headers.get("referer").get
     val futlogin = models.User.form.bindFromRequest.fold(
       errors => {
         Future.successful(None)
@@ -47,7 +48,7 @@ object Login extends Controller with MongoController {
     )
     futlogin.map{
       login => {
-        val result = Redirect("/", null)
+        val result = Redirect(referer, null)
         login match {
           case Some(userid) => result.withSession("bsonid" -> userid)
           case None => result.withSession("bsonid" -> "badid")
@@ -55,7 +56,8 @@ object Login extends Controller with MongoController {
       }
     }
   }
-  def logout = Action {
-    Redirect("/",null).withNewSession
+  def logout = Action { implicit request =>
+    val referer = request.headers.get("referer").get
+    Redirect(referer,null).withNewSession
   }
 }
